@@ -1,0 +1,242 @@
+import os
+os.chdir(r"D:\01 KTH\02 Academics\01 Sem 1\02 Period 2\01 SG2218_Turbulence\05 Lab\01 Data\Data_HT2025\Data_HT2025\Group3")
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
+import pandas as pd
+
+#%%
+#importing the data
+vel_profile980=pd.read_excel('ProfileGr3_.xlsx')
+u980=vel_profile980['U'].to_numpy()
+y980=vel_profile980['y'].to_numpy()
+
+vel_profile740=pd.read_excel('ProfileGr2_.xlsx')
+u740=vel_profile740['U'].to_numpy()
+y740=vel_profile740['y'].to_numpy()
+
+vel_profile500=pd.read_excel('ProfileGr1.xlsx')
+u500=vel_profile500['U'].to_numpy()
+y500=vel_profile500['y'].to_numpy()
+
+#%%
+#normalizing the data
+y980_norm=(y980-np.min(y980))/(np.max(y980)-np.min(y980))
+y740_norm=(y740-np.min(y740))/(np.max(y740)-np.min(y740))
+y500_norm=(y500-np.min(y500))/(np.max(y500)-np.min(y500))
+
+u980_norm=(u980-np.min(u980))/(np.max(u980)-np.min(u980))
+u740_norm=(u740-np.min(u740))/(np.max(u740)-np.min(u740))
+u500_norm=(u500-np.min(u500))/(np.max(u500)-np.min(u500))
+
+#adding offset of 0.7 to u980_norm:
+y980_norm+=0.65
+
+#%%
+#Q1:Plotting normalised U vs y graph
+fig=plt.subplot(2,1,1)
+plt.plot(y980_norm,u980_norm,label='x/d=980')
+plt.plot(y740_norm,u740_norm,label='x/d=740')
+plt.plot(y500_norm,u500_norm,label='x/d=500')
+plt.ylabel(r"$U$ [m/s]")
+plt.xlabel(r"$y$ [mm]")
+plt.legend(loc='best')
+plt.gca().xaxis.set_major_locator(MultipleLocator(0.1))
+plt.gca().yaxis.set_major_locator(MultipleLocator(0.1))
+plt.title('U[m/s] vs y[mm] plot for different x/d values')
+plt.grid('True')
+
+fig=plt.subplot(2,1,2)
+plt.plot(y980_norm,u980_norm,label='x/d=980')
+plt.plot(y740_norm,u740_norm,label='x/d=740')
+plt.plot(y500_norm,u500_norm,label='x/d=500')
+plt.ylabel(r"$U$ [m/s]")
+plt.xlabel(r"$y$ [mm]")
+#plt.legend(loc='best')
+plt.gca().xaxis.set_major_locator(MultipleLocator(0.05))
+plt.gca().yaxis.set_major_locator(MultipleLocator(0.1))
+plt.xlim(0.6,1.2)
+plt.grid('True')
+
+#%%
+#Q1: Plotting normalised y vs U graph
+plt.subplot(2,1,1)
+plt.plot(u980_norm,y980_norm,label='x/d=980')
+plt.plot(u740_norm,y740_norm,label='x/d=740')
+plt.plot(u500_norm,y500_norm,label='x/d=500')
+plt.ylabel(r'$y$ [mm]')
+plt.xlabel(r'$U$ [m/s]')
+plt.gca().xaxis.set_major_locator(MultipleLocator(0.1))
+plt.gca().yaxis.set_major_locator(MultipleLocator(0.2))
+#plt.legend(loc='best')
+plt.title('y[mm] vs U[m/s] plot for different x/d values')
+plt.grid('True')
+
+plt.subplot(2,1,2)
+plt.plot(u980_norm,y980_norm,label='x/d=980')
+plt.plot(u740_norm,y740_norm,label='x/d=740')
+plt.plot(u500_norm,y500_norm,label='x/d=500')
+plt.ylabel(r'$y$ [m]')
+plt.xlabel(r'$U$ [m/s]')
+plt.gca().xaxis.set_major_locator(MultipleLocator(0.1))
+plt.gca().yaxis.set_major_locator(MultipleLocator(0.05))
+plt.legend(loc='best')
+plt.ylim(0.7,1.1)
+plt.grid('True')
+
+#%%
+#Q2: Velocity Deficit Ud and Velocity scale Us of the turbulent flow
+
+u0=20                 #free stream velocity given in experiment
+u_d980=abs(u0-u980)    #velocity deficit for x/d=980
+u_d740=abs(u0-u740)    #velocity deficit for x/d=740
+u_d500=abs(u0-u500)    #velocity deficit for x/d=500
+
+u_s980=np.max(u_d980)           #velocity scale for x/d=980
+u_s740=np.max(u_d740)           #velocity scale for x/d=740
+u_s500=np.max(u_d500)           #velocity scale for x/d=500
+
+print('Velocity Scale (U(s)) of x/d=980: {:.3f}'.format(u_s980))
+print('Velocity Scale (U(d)) of x/d=740: {:.3f}'.format(u_s740))
+print('Velocity Scale (U(d)) of x/d=500: {:.3f}'.format(u_s500))
+
+#finding virtual origin
+x_0_980=np.interp(np.max(u_d980),u_d980,y980_norm)
+x_0_740=np.interp(np.max(u_d740),u_d740,y740_norm)
+x_0_500=np.interp(np.max(u_d500),u_d500,y500_norm)
+
+y980_1=y980_norm-x_0_980
+y740_1=y740_norm-x_0_740
+y500_1=y500_norm-x_0_500
+
+#%%
+#Q2: Plotting with individual virtual axes
+plt.plot(y980_1,u_d980,label='x/d=980')
+plt.plot(y740_1,u_d740,label='x/d=740')
+plt.plot(y500_1,u_d500,label='x/d=500')
+plt.xlabel(r'$y$ [mm]')
+plt.ylabel(r'$Ud$ [m/s]')
+plt.gca().xaxis.set_major_locator(MultipleLocator(0.1))
+plt.gca().yaxis.set_major_locator(MultipleLocator(0.1))
+plt.legend(loc='best')
+plt.grid('True')
+
+#%%
+#Q3: To find the cross-stream length scale (delta) where Ud decays to Us/2
+
+delta980=np.interp((u_s980/2),u_d980,y980_1)     #half length for x/d=980
+delta740=np.interp((u_s740/2),u_d740,y740_1)     #half length for x/d=740
+delta500=np.interp((u_s500/2),u_d500,y500_1)     #half length for x/d=500
+
+#printing length Scales
+print('Length Scale for x/d=980:{:.3f}'.format(delta980))
+print('Length Scale for x/d=740:{:.3f}'.format(delta740))
+print('Length Scale for x/d=500:{:.3f}'.format(delta500))
+
+y980_new=y980_1/delta980
+y740_new=y740_1/delta740
+y500_new=y500_1/delta500
+
+plt.plot(y980_new,u_d980,label='x/d=900')
+plt.plot(y740_new,u_d740,label='x/d=740')
+plt.plot(y500_new,u_d500,label='x/d=500')
+plt.title('Velocity deficit (Ud) vs y/\delta graph')
+plt.xlabel(r'$y/\delta$')
+plt.ylabel(r'$Ud$ [m/s]')
+plt.gca().xaxis.set_major_locator(MultipleLocator(0.2))
+plt.gca().yaxis.set_major_locator(MultipleLocator(0.1))
+plt.legend(loc='best')
+plt.grid('True')
+
+
+#%%
+#Q4: Plotting in self-similar coordinates
+ud980_scaled=u_d980/u_s980   
+ud740_scaled=u_d740/u_s740   
+ud500_scaled=u_d500/u_s500
+
+#plotting with individual virtual origins
+plt.plot(y980_new,ud980_scaled,label='x/d=900')
+plt.plot(y740_new,ud740_scaled,label='x/d=740')
+plt.plot(y500_new,ud500_scaled,label='x/d=500')
+plt.title('Scaled Ud plot in self-similar coordinates')
+plt.xlabel(r'$y/\delta$')
+plt.ylabel(r'$Ud/Us$ [m/s]')
+plt.gca().xaxis.set_major_locator(MultipleLocator(0.2))
+plt.gca().yaxis.set_major_locator(MultipleLocator(0.1))
+plt.legend(loc='best')
+plt.grid('True')
+plt.ylim([0,1.1])
+
+#%%
+#plotting the self similar profile
+alpha= np.log(2)                       # Reference: SB Pope equation 5.240
+"""
+epsillon980=y980_new/delta980
+epsillon740=y740_new/delta740
+epsillon500=y500_new/delta500
+"""
+
+#Finding function f in the self similar solution
+f980=np.exp(-alpha*y980_1**2)
+f740=np.exp(-alpha*y740_1**2)
+f500=np.exp(-alpha*y500_1**2)
+eta_grid980=np.linspace(-3.0,3.0,len(f980))
+eta_grid740=np.linspace(-3.0,3.0,len(f740))
+eta_grid500=np.linspace(-3.0,3.0,len(f500))
+
+#plotting self similar solution
+plt.plot(eta_grid980,f980,label='x/d=900')
+plt.plot(eta_grid740,f740,label='x/d=740')
+plt.plot(eta_grid500,f500,label='x/d=500')
+plt.title('self similar solution graph')
+plt.xlabel(r'$\epsilon$')
+plt.ylabel(r'$f(\epsilon)$')
+plt.legend(loc='best')
+plt.grid('True')
+plt.gca().xaxis.set_major_locator(MultipleLocator(0.5))
+plt.gca().yaxis.set_major_locator(MultipleLocator(0.1))
+plt.show()
+
+#%%
+#plotting with individual experimental data for x/d=980
+
+plt.plot(eta_grid980,f980,label='x/d=900 (Self Similar Solution)')
+plt.plot((eta_grid980+3.0),ud980_scaled,label='x/d=900')
+plt.title('Comparison with Self similar solution: x/d=980')
+plt.xlabel(r'$\epsilon$')
+plt.ylabel(r'$f(\epsilon)$')
+plt.legend(loc='best')
+plt.grid('True')
+plt.gca().xaxis.set_major_locator(MultipleLocator(1.0))
+plt.gca().yaxis.set_major_locator(MultipleLocator(0.1))
+plt.show()
+
+#%%
+#plotting with individual experimental data for x/d=740
+
+plt.plot(eta_grid740,f740,label='x/d=740 (Self Similar Solution)')
+plt.plot(eta_grid740,ud740_scaled,label='x/d=740')
+plt.title('Comparison with self similar solution: x/d=740')
+plt.xlabel(r'$\epsilon$')
+plt.ylabel(r'$f(\epsilon)$')
+plt.legend(loc='best')
+plt.grid('True')
+plt.gca().xaxis.set_major_locator(MultipleLocator(0.5))
+plt.gca().yaxis.set_major_locator(MultipleLocator(0.1))
+plt.show()
+
+#%%
+#plotting with individual experimental data for x/d=500
+
+plt.plot(eta_grid500,f500,label='x/d=500 (Self Similar Solution)')
+plt.plot(eta_grid500,ud500_scaled,label='x/d=500')
+plt.title('Comparison with self similar solution: x/d=500')
+plt.xlabel(r'$\epsilon$')
+plt.ylabel(r'$f(\epsilon)$')
+plt.legend(loc='best')
+plt.grid('True')
+plt.gca().xaxis.set_major_locator(MultipleLocator(0.5))
+plt.gca().yaxis.set_major_locator(MultipleLocator(0.1))
+plt.show()
+
